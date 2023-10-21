@@ -1,4 +1,5 @@
 import pyautogui as pg
+import math
 
 hand_closed = False
 timer = 0
@@ -55,6 +56,41 @@ def volume_mute(hand_landmarks):
     else:
         hand_closed = False
 
+
+def get_direction(hand_landmarks):
+   
+    wrist_x, wrist_y, wrist_z = get_landmark_3d(hand_landmarks, 0)
+    index_x, index_y, index_z = get_landmark_3d(hand_landmarks, 8)
+    middle_x, middle_y, middle_z = get_landmark_3d(hand_landmarks, 12)
+    ring_x, ring_y, ring_z = get_landmark_3d(hand_landmarks, 16)
+    pinky_x, pinky_y, pinky_z = get_landmark_3d(hand_landmarks, 20)
+
+    wrist = (wrist_x, wrist_y, wrist_z)
+    index_tip = (index_x, index_y, index_z)
+    middle_tip = (middle_x, middle_y, middle_z)
+
+    # Calcolo del vettore
+    vector = (index_tip[0] - wrist[0], index_tip[1] - wrist[1], index_tip[2] - wrist[2])
+
+    # Normalizzazione del vettore
+    length = math.sqrt(vector[0] ** 2 + vector[1] ** 2 + vector[2] ** 2)
+    normalized_vector = (vector[0] / length, vector[1] / length, vector[2] / length)
+
+    # Calcolo dell'angolo rispetto all'asse x (in radianti)
+    angle = math.atan2(normalized_vector[1], normalized_vector[0])
+
+    # Converte l'angolo in gradi
+    angle_degrees = math.degrees(angle)
+
+    if -45 <= angle_degrees <= 45:
+        return "Right"
+    elif 45 < angle_degrees <= 135:
+        return "Down"
+    elif -135 <= angle_degrees < -45:
+        return "Up"
+    else:
+        return "Left"
+  
 
 def get_landmark_3d(hand_landmarks, landmark_id):
     landmark = hand_landmarks.landmark[landmark_id]
