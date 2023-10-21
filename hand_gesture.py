@@ -1,25 +1,43 @@
 def hand_status(hand_landmarks):
-    wrist_x = hand_landmarks.landmark[0].x
+    # wrist_x = hand_landmarks.landmark[0].x
 
-    # Coordinata X del pollice e dell'indice
-    index_x = hand_landmarks.landmark[8].x
-    middle_x = hand_landmarks.landmark[12].x
-    ring_x = hand_landmarks.landmark[16].x
-    pinky_x = hand_landmarks.landmark[20].x
+    # # Coordinata X del pollice e dell'indice
+    # index_x = hand_landmarks.landmark[8].x
+    # middle_x = hand_landmarks.landmark[12].x
+    # ring_x = hand_landmarks.landmark[16].x
+    # pinky_x = hand_landmarks.landmark[20].x
 
-    # Calcolo la distanza tra il pollice e l'indice
-    distance_index = abs(wrist_x - index_x)
-    distance_middle = abs(wrist_x - middle_x)
-    distance_ring = abs(wrist_x - ring_x)
-    distance_pinky = abs(wrist_x - pinky_x)
+    # # Calcolo la distanza tra il pollice e l'indice
+    # distance_index = abs(wrist_x - index_x)
+    # distance_middle = abs(wrist_x - middle_x)
+    # distance_ring = abs(wrist_x - ring_x)
+    # distance_pinky = abs(wrist_x - pinky_x)
+
+
+    wrist_x, wrist_y, wrist_z = get_landmark_3d(hand_landmarks, 0)  # polso
+    thumb_x, thumb_y, thumb_z = get_landmark_3d(hand_landmarks, 4)  # pollice
+    index_x, index_y, index_z = get_landmark_3d(hand_landmarks, 8)  # indice
+    middle_x, middle_y, middle_z = get_landmark_3d(hand_landmarks, 12) # indice
+    ring_x, ring_y, ring_z = get_landmark_3d(hand_landmarks, 16) # indice
+    pinky_x, pinky_y, pinky_z = get_landmark_3d(hand_landmarks, 20) # indice
+
+    distance_index = abs(index_y - wrist_y)
+    distance_middle = abs(middle_y - wrist_y)
+    distance_ring = abs(ring_y -wrist_y)
+    distance_pinky = abs(pinky_y - wrist_y)
 
     # Soglia per determimare la chiusura della mano
-    threshold = 0.03
+    threshold = 0.18
 
-    if distance_index and distance_middle and distance_ring and distance_pinky > threshold:
+    if all(distance > threshold for distance in [distance_index, distance_middle, distance_ring, distance_pinky]):
         return "Aperta"
     else:
         return "Chiusa"
+
+    # if distance_index and distance_middle and distance_ring and distance_pinky > threshold:
+    #     return "Aperta"
+    # else:
+    #     return "Chiusa"
 
 
 def get_landmark_3d(hand_landmarks, landmark_id):
@@ -41,6 +59,7 @@ def okay_gesture(hand_landmarks):
     direction_y = index_y - thumb_y
     direction_z = index_z - thumb_z
 
+    
     '''coordinate tridimensionali di alcune landmarks (direzioni) appunti
                 direction_x: Questa variabile rappresenta la direzione lungo l'asse X ed è calcolata sottraendo la coordinata X 
                 del pollice dalla coordinata X dell'indice. 
@@ -59,4 +78,6 @@ def okay_gesture(hand_landmarks):
 
                 sottrarre cordinate x delle dita per determinare se si sta facendo "okay" con la mano
                 '''
+    
+
     return (f"Direzione X: {direction_x}, Direzione Y: {direction_y}, Direzione Z: {direction_z}")
