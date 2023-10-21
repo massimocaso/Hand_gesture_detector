@@ -32,9 +32,9 @@ with mp_hands.Hands(max_num_hands=2, min_detection_confidence=0.5, min_tracking_
                 
 
                 # Cordinate landmarks del pollice e dell'indice
-                cv2.putText(image, hg.okay_gesture(hand_landmarks), (10, image.shape[0] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 0), 2)
+                # cv2.putText(image, hg.okay_gesture(hand_landmarks), (10, image.shape[0] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 0), 2)
                 
-                hand_status = hg.volume_mute(hand_landmarks)
+                hand_status = hg.volume_control(hand_landmarks)
                 hand_status = hg.get_direction(hand_landmarks)
                 # Testo che visualizza lo stato della mano 
                 cv2.putText(image, f"Comando: {hand_status}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)

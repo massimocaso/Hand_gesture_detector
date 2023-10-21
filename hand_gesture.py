@@ -4,58 +4,102 @@ import math
 hand_closed = False
 timer = 0
 
-def volume_mute(hand_landmarks):
+def volume_control(hand_landmarks):
     global hand_closed, timer
-    
-    wrist_x, wrist_y, wrist_z = get_landmark_3d(hand_landmarks, 0)
-    index_x, index_y, index_z = get_landmark_3d(hand_landmarks, 8)
-    middle_x, middle_y, middle_z = get_landmark_3d(hand_landmarks, 12)
-    ring_x, ring_y, ring_z = get_landmark_3d(hand_landmarks, 16)
-    pinky_x, pinky_y, pinky_z = get_landmark_3d(hand_landmarks, 20)
 
-    distance_index = abs(index_y - wrist_y)
-    distance_middle = abs(middle_y - wrist_y)
-    distance_ring = abs(ring_y - wrist_y)
-    distance_pinky = abs(pinky_y - wrist_y)
+    check_close = [1, 2, 3, 4]
+    check_12 = [0, 0, 3, 4]
+    fingers = finger_status(hand_landmarks)
+    hand_direction = get_direction(hand_landmarks)
 
-    # Soglia per determinare la chiusura della mano
-    threshold = 0.2
-
-    fingers = []
-    check = [1, 2, 3, 4]
-
-    if distance_index < threshold:
-        fingers.append(1)
-    else:
-        fingers.append(0)
-
-    if distance_middle < threshold:
-        fingers.append(2)
-    else:
-        fingers.append(0)
-
-    if distance_ring < threshold:
-        fingers.append(3)
-    else:
-        fingers.append(0)
-
-    if distance_pinky < threshold:
-        fingers.append(4)
-    else:
-        fingers.append(0)
-
-    if fingers == check and not hand_closed:
+    if fingers == check_close and hand_direction == "Up" and not hand_closed:
         # Esegui il comando solo se la mano è chiusa e non è già stata chiusa prima
         pg.press('volumemute')
         hand_closed = True
         timer = 5  # Imposta il timer a 5 secondi
         return "Volume Mute"
     
+    if fingers == check_12 and hand_direction == "Up":
+        pg.press('volumeup')
+        timer = 5
+        return "Volume Up"
+    
+    if fingers == check_12 and hand_direction == "Down":
+        pg.press('volumedown')
+        timer = 5
+        return "Volume down"
+    
     if timer > 0:
         timer -= 1
     else:
         hand_closed = False
 
+def finger_status(hand_landmarks):
+
+    wrist_x, wrist_y, wrist_z = get_landmark_3d(hand_landmarks, 0)
+    index_x, index_y, index_z = get_landmark_3d(hand_landmarks, 8)
+    middle_x, middle_y, middle_z = get_landmark_3d(hand_landmarks, 12)
+    ring_x, ring_y, ring_z = get_landmark_3d(hand_landmarks, 16)
+    pinky_x, pinky_y, pinky_z = get_landmark_3d(hand_landmarks, 20)
+
+    direction = get_direction(hand_landmarks)
+    # Soglia per determinare la chiusura della mano
+    threshold = 0
+    fingers = []
+
+    if direction == "Up":  
+        threshold = 0.2
+        distance_index = abs(index_y - wrist_y)
+        distance_middle = abs(middle_y - wrist_y)
+        distance_ring = abs(ring_y - wrist_y)
+        distance_pinky = abs(pinky_y - wrist_y)
+
+        if distance_index < threshold:
+            fingers.append(1)
+        else:
+            fingers.append(0)
+
+        if distance_middle < threshold:
+            fingers.append(2)
+        else:
+            fingers.append(0)
+
+        if distance_ring < threshold:
+            fingers.append(3)
+        else:
+            fingers.append(0)
+
+        if distance_pinky < threshold:
+            fingers.append(4)
+        else:
+            fingers.append(0)
+    elif direction == "Down":
+        threshold = 0.22
+        distance_index = abs(wrist_y - index_y)
+        distance_middle = abs(wrist_y - middle_y)
+        distance_ring = abs(wrist_y - ring_y)
+        distance_pinky = abs(wrist_y - pinky_y)
+
+        if distance_index < threshold:
+            fingers.append(1)
+        else:
+            fingers.append(0)
+
+        if distance_middle < threshold:
+            fingers.append(2)
+        else:
+            fingers.append(0)
+
+        if distance_ring < threshold:
+            fingers.append(3)
+        else:
+            fingers.append(0)
+
+        if distance_pinky < threshold:
+            fingers.append(4)
+        else:
+            fingers.append(0)
+    return fingers
 
 def get_direction(hand_landmarks):
    
