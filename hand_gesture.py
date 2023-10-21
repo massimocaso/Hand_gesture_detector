@@ -1,43 +1,59 @@
-def hand_status(hand_landmarks):
-    # wrist_x = hand_landmarks.landmark[0].x
+import pyautogui as pg
 
-    # # Coordinata X del pollice e dell'indice
-    # index_x = hand_landmarks.landmark[8].x
-    # middle_x = hand_landmarks.landmark[12].x
-    # ring_x = hand_landmarks.landmark[16].x
-    # pinky_x = hand_landmarks.landmark[20].x
+hand_closed = False
+timer = 0
 
-    # # Calcolo la distanza tra il pollice e l'indice
-    # distance_index = abs(wrist_x - index_x)
-    # distance_middle = abs(wrist_x - middle_x)
-    # distance_ring = abs(wrist_x - ring_x)
-    # distance_pinky = abs(wrist_x - pinky_x)
-
-
-    wrist_x, wrist_y, wrist_z = get_landmark_3d(hand_landmarks, 0)  # polso
-    thumb_x, thumb_y, thumb_z = get_landmark_3d(hand_landmarks, 4)  # pollice
-    index_x, index_y, index_z = get_landmark_3d(hand_landmarks, 8)  # indice
-    middle_x, middle_y, middle_z = get_landmark_3d(hand_landmarks, 12) # indice
-    ring_x, ring_y, ring_z = get_landmark_3d(hand_landmarks, 16) # indice
-    pinky_x, pinky_y, pinky_z = get_landmark_3d(hand_landmarks, 20) # indice
+def volume_mute(hand_landmarks):
+    global hand_closed, timer
+    
+    wrist_x, wrist_y, wrist_z = get_landmark_3d(hand_landmarks, 0)
+    index_x, index_y, index_z = get_landmark_3d(hand_landmarks, 8)
+    middle_x, middle_y, middle_z = get_landmark_3d(hand_landmarks, 12)
+    ring_x, ring_y, ring_z = get_landmark_3d(hand_landmarks, 16)
+    pinky_x, pinky_y, pinky_z = get_landmark_3d(hand_landmarks, 20)
 
     distance_index = abs(index_y - wrist_y)
     distance_middle = abs(middle_y - wrist_y)
-    distance_ring = abs(ring_y -wrist_y)
+    distance_ring = abs(ring_y - wrist_y)
     distance_pinky = abs(pinky_y - wrist_y)
 
-    # Soglia per determimare la chiusura della mano
-    threshold = 0.18
+    # Soglia per determinare la chiusura della mano
+    threshold = 0.2
 
-    if all(distance > threshold for distance in [distance_index, distance_middle, distance_ring, distance_pinky]):
-        return "Aperta"
+    fingers = []
+    check = [1, 2, 3, 4]
+
+    if distance_index < threshold:
+        fingers.append(1)
     else:
-        return "Chiusa"
+        fingers.append(0)
 
-    # if distance_index and distance_middle and distance_ring and distance_pinky > threshold:
-    #     return "Aperta"
-    # else:
-    #     return "Chiusa"
+    if distance_middle < threshold:
+        fingers.append(2)
+    else:
+        fingers.append(0)
+
+    if distance_ring < threshold:
+        fingers.append(3)
+    else:
+        fingers.append(0)
+
+    if distance_pinky < threshold:
+        fingers.append(4)
+    else:
+        fingers.append(0)
+
+    if fingers == check and not hand_closed:
+        # Esegui il comando solo se la mano è chiusa e non è già stata chiusa prima
+        pg.press('volumemute')
+        hand_closed = True
+        timer = 5  # Imposta il timer a 5 secondi
+        return "Volume Mute"
+    
+    if timer > 0:
+        timer -= 1
+    else:
+        hand_closed = False
 
 
 def get_landmark_3d(hand_landmarks, landmark_id):
