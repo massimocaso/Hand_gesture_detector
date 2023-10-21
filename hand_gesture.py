@@ -11,7 +11,7 @@ def volume_control(hand_landmarks):
     check_12 = [0, 0, 3, 4]
     fingers = finger_status(hand_landmarks)
     hand_direction = get_direction(hand_landmarks)
-
+    print(fingers)
     if fingers == check_close and hand_direction == "Up" and not hand_closed:
         # Esegui il comando solo se la mano è chiusa e non è già stata chiusa prima
         pg.press('volumemute')
@@ -99,6 +99,59 @@ def finger_status(hand_landmarks):
             fingers.append(4)
         else:
             fingers.append(0)
+    elif direction == "Right":
+        threshold = 0.2
+        distance_index = abs(wrist_x - index_x)
+        distance_middle = abs(wrist_x - middle_x)
+        distance_ring = abs(wrist_x - ring_x)
+        distance_pinky = abs(wrist_x - pinky_x)
+
+        if distance_index < threshold:
+            fingers.append(1)
+        else:
+            fingers.append(0)
+
+        if distance_middle < threshold:
+            fingers.append(2)
+        else:
+            fingers.append(0)
+
+        if distance_ring < threshold:
+            fingers.append(3)
+        else:
+            fingers.append(0)
+
+        if distance_pinky < threshold:
+            fingers.append(4)
+        else:
+            fingers.append(0)
+    elif direction == "Left":
+        threshold = 0.2
+        distance_index = abs(index_x - wrist_x)
+        distance_middle = abs(middle_x- wrist_x)
+        distance_ring = abs(ring_x - wrist_x)
+        distance_pinky = abs(pinky_x - wrist_x)
+
+        if distance_index < threshold:
+            fingers.append(1)
+        else:
+            fingers.append(0)
+
+        if distance_middle < threshold:
+            fingers.append(2)
+        else:
+            fingers.append(0)
+
+        if distance_ring < threshold:
+            fingers.append(3)
+        else:
+            fingers.append(0)
+
+        if distance_pinky < threshold:
+            fingers.append(4)
+        else:
+            fingers.append(0)
+        
     return fingers
 
 def get_direction(hand_landmarks):
