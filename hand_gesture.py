@@ -7,23 +7,27 @@ timer = 0
 def volume_control(hand_landmarks):
     global hand_closed, timer
 
+    # Array di check per la dita
     check_close = [1, 2, 3, 4]
     check_12 = [0, 0, 3, 4]
     fingers = finger_status(hand_landmarks)
     hand_direction = get_direction(hand_landmarks)
-    print(fingers)
+    
+    # Gesture per mutare il volume
     if fingers == check_close and hand_direction == "Up" and not hand_closed:
-        # Esegui il comando solo se la mano è chiusa e non è già stata chiusa prima
+        # Esegue il comando solo se la mano è chiusa e non è già stata chiusa prima
         pg.press('volumemute')
         hand_closed = True
         timer = 5  # Imposta il timer a 5 secondi
         return "Volume Mute"
     
+    #Gesture per alzare il volume
     if fingers == check_12 and hand_direction == "Up":
         pg.press('volumeup')
         timer = 5
         return "Volume Up"
     
+    # Gesture per diminuire il volume
     if fingers == check_12 and hand_direction == "Down":
         pg.press('volumedown')
         timer = 5
@@ -35,7 +39,16 @@ def volume_control(hand_landmarks):
         hand_closed = False
 
 def finger_status(hand_landmarks):
+    '''
+    Questa funzione determina lo stato delle dita della mano (aperte o chiuse) in base alla direzione della mano..
 
+    I treshold sono una soglia (distanza) che le dita devono raggiungere per essere considerate chiuse
+
+    Restituisce:
+        Una lista di valori (0 o il numero corrispondente del dito) che rappresenta lo stato delle dita 
+        (1/2/3/4 per dita chiuse, 0 per dita aperte).
+    '''
+    # Coordinate delle dita
     wrist_x, wrist_y, wrist_z = get_landmark_3d(hand_landmarks, 0)
     index_x, index_y, index_z = get_landmark_3d(hand_landmarks, 8)
     middle_x, middle_y, middle_z = get_landmark_3d(hand_landmarks, 12)
@@ -156,6 +169,17 @@ def finger_status(hand_landmarks):
 
 def get_direction(hand_landmarks):
    
+    '''
+    Questa funzione calcola la direzione in cui punta la mano utilizzando i landmark delle mani rilevati.
+    
+    Parametri:
+        - hand_landmarks: I landmark delle mani rilevati con mediapipe
+    
+    Restituisce:
+        Una stringa che rappresenta la direzione in cui la mano è orientata ("Right" per destra, "Down" per il basso,
+        "Up" per l'alto, "Left" per sinistra).
+    '''
+
     wrist_x, wrist_y, wrist_z = get_landmark_3d(hand_landmarks, 0)
     index_x, index_y, index_z = get_landmark_3d(hand_landmarks, 8)
     middle_x, middle_y, middle_z = get_landmark_3d(hand_landmarks, 12)
@@ -166,17 +190,15 @@ def get_direction(hand_landmarks):
     index_tip = (index_x, index_y, index_z)
     middle_tip = (middle_x, middle_y, middle_z)
 
-    # Calcolo del vettore
+    # Calcola un vettore che rappresenta la direzione dalla punta dell'indice al polso.
     vector = (index_tip[0] - wrist[0], index_tip[1] - wrist[1], index_tip[2] - wrist[2])
 
     # Normalizzazione del vettore
     length = math.sqrt(vector[0] ** 2 + vector[1] ** 2 + vector[2] ** 2)
     normalized_vector = (vector[0] / length, vector[1] / length, vector[2] / length)
 
-    # Calcolo dell'angolo rispetto all'asse x (in radianti)
+    # Calcolo dell'angolo rispetto all'asse x (in radianti) rispetto al vettore normalizzato
     angle = math.atan2(normalized_vector[1], normalized_vector[0])
-
-    # Converte l'angolo in gradi
     angle_degrees = math.degrees(angle)
 
     if -45 <= angle_degrees <= 45:
@@ -194,39 +216,28 @@ def get_landmark_3d(hand_landmarks, landmark_id):
     return landmark.x, landmark.y, landmark.z
 
 
-def okay_gesture(hand_landmarks):
+def next_gesture(hand_landmarks):
+    global hand_closed, timer
 
-    wrist_x, wrist_y, wrist_z = get_landmark_3d(hand_landmarks, 0)  # polso
-    thumb_x, thumb_y, thumb_z = get_landmark_3d(hand_landmarks, 4)  # pollice
-    index_x, index_y, index_z = get_landmark_3d(hand_landmarks, 8)  # indice
-    middle_x, middle_y, middle_z = get_landmark_3d(hand_landmarks, 12) # indice
-    ring_x, ring_y, ring_z = get_landmark_3d(hand_landmarks, 16) # indice
-    pinky_x, pinky_y, pinky_z = get_landmark_3d(hand_landmarks, 20) # indice
-
-    # Calcoliamo le direzioni lungo gli assi X, Y e Z
-    direction_x = index_x - thumb_x
-    direction_y = index_y - thumb_y
-    direction_z = index_z - thumb_z
-
+    check_close = [0, 2, 3, 4]
+    fingers = finger_status(hand_landmarks)
+    hand_direction = get_direction(hand_landmarks)
     
-    '''coordinate tridimensionali di alcune landmarks (direzioni) appunti
-                direction_x: Questa variabile rappresenta la direzione lungo l'asse X ed è calcolata sottraendo la coordinata X 
-                del pollice dalla coordinata X dell'indice. 
-                - se positiva, indica che l'indice è a destra del pollice lungo l'asse X 
-                - se negativa, indica che l'indice è a sinistra del pollice lungo l'asse X.
-
-                direction_y: Questa variabile rappresenta la direzione lungo l'asse Y ed è calcolata sottraendo la coordinata Y 
-                del pollice dalla coordinata Y dell'indice.
-                - se positiva, indica che l'indice è sopra al pollice lungo l'asse Y 
-                - se negativa, indica che l'indice è sotto al pollice lungo l'asse Y.
-
-                direction_z: Questa variabile rappresenta la direzione lungo l'asse Z ed è calcolata sottraendo la coordinata Z 
-                del pollice dalla coordinata Z dell'indice. 
-                - se direction_z è positiva, indica che l'indice è più vicino alla fotocamera rispetto al pollice lungo l'asse Z 
-                - se è negativa, indica che l'indice è più lontano rispetto al pollice lungo l'asse Z.
-
-                sottrarre cordinate x delle dita per determinare se si sta facendo "okay" con la mano
-                '''
+    # Gesture per mutare il volume
+    if fingers == check_close and hand_direction == "Right" and not hand_closed:
+        # Esegue il comando solo se la mano è chiusa e non è già stata chiusa prima
+        pg.press('right')
+        hand_closed = True
+        timer = 20  # Imposta il timer a 5 secondi
+        return "Freccia destra"
     
-
-    return (f"Direzione X: {direction_x}, Direzione Y: {direction_y}, Direzione Z: {direction_z}")
+    #Gesture per alzare il volume
+    if fingers == check_close and hand_direction == "Left" and not hand_closed:
+        pg.press('left')
+        timer = 20
+        return "Freccia sinistra"
+  
+    if timer > 0:
+        timer -= 1
+    else:
+        hand_closed = False
