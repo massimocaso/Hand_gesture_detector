@@ -8,7 +8,6 @@ mp_hands = mp.solutions.hands
 
 # Recuperiamo la sorgente video
 camera = cv2.VideoCapture(0)
-image_to_overlay = cv2.imread('data/la_roccia.jpg')
 
 
 with mp_hands.Hands(max_num_hands=2, min_detection_confidence=0.5, min_tracking_confidence=0.5) as hands:
