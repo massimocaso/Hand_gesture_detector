@@ -113,7 +113,7 @@ def finger_status(hand_landmarks):
         else:
             fingers.append(0)
     elif direction == "Right":
-        threshold = 0.2
+        threshold = 0.22
         distance_index = abs(wrist_x - index_x)
         distance_middle = abs(wrist_x - middle_x)
         distance_ring = abs(wrist_x - ring_x)
@@ -139,7 +139,7 @@ def finger_status(hand_landmarks):
         else:
             fingers.append(0)
     elif direction == "Left":
-        threshold = 0.2
+        threshold = 0.22
         distance_index = abs(index_x - wrist_x)
         distance_middle = abs(middle_x- wrist_x)
         distance_ring = abs(ring_x - wrist_x)
